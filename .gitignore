@@ -1,6 +1,10 @@
 ## Python Virtual Environment
 .venv/
 
+## Custom
+src/glove-wikipedia/
+src/presentation/
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
