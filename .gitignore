@@ -1,5 +1,6 @@
 ## Python Virtual Environment
 .venv/
+__pycache__
 
 ## Custom
 src/glove-wikipedia/
