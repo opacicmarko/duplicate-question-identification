@@ -58,10 +58,10 @@ class ProcessedResult:
     embedding: np.array
     avg_embedding: np.array
 
-def questions_generator(path: str) -> Generator[dict[str, str], Any, None]:
+def questions_generator(path: str, sep: str = ',') -> Generator[dict[str, str], Any, None]:
     with open(path) as questions_file:
         header = questions_file.readline()
-        columns = tuple(map(lambda x: x.replace('"', ''), header.split(',')))
+        columns = tuple(map(lambda x: x.replace('"', ''), header.split(sep)))
         for line in questions_file:
             fields = tuple(map(lambda x: x.replace('"', ''), line.strip().split('","')))
             yield dict(zip(columns, fields))
