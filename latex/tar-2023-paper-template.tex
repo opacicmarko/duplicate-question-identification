@@ -12,9 +12,9 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
-\title{TAR System Description Paper Template}
+\title{Duplicate Question Identification in Quora}
 
-\name{Author1, Author2, Author3} 
+\name{Marko Opačić, Javier Salvatierra} 
 
 \address{
 University of Zagreb, Faculty of Electrical Engineering and Computing\\
@@ -37,32 +37,43 @@ This section is the introduction to your paper. Introduction should not be too e
 
 This is the second paragraph of the introduction. In \LaTeX , paragraphs are separated by inserting an empty line in between them.  Avoid very large paragraphs (larger than half of the page height), but also avoid tiny paragraphs (e.g., one-sentence paragraphs).
 
-\section{Second section}
+\section{Related Works}
 
-In scientific papers, this section usually (but not necessarily) briefly describes the related research and what makes the presented approach different from it.
+This topic has already been worked on previously in 2017 as a part of a Kaggle competition where the aim of the participants was to 
+predict which of the provided pairs of questions contained two questions with the same meaning attending to their semantic. Therefore, we should take 
+in account the model provided by the winners of the competition: 
 
-\subsection{First subsection}
-\label{sec:first}
+\subsection{Siamese LSTM}
+As a variant of recurrent neural networks (LSTM), it is an approach that compares the similarity between pairs of data sequences. It employs two identical LSTMs that process two input sequences simultaneously and then compares their final vector representations to determine their similarity.
 
-This is a subsection of the second section.
 
-\subsection{Second subsection}
+\section{Data}
 
-This is the second subsection of the second section. Referencing the (sub)sections in text is performed as follows: ``in Section~\ref{sec:first} we have shown \dots''.
+For the task of duplicate question identification based on their semantic similarity, 
+we have used a dataset from the prior Kaggle competition from 2017 which handled the same topic.
 
-\subsubsection{Sub-subsection example} 
+\subsection{Quora public dataset}
 
-This is a sub-subsection. If possible, it is better to avoid sub-subsections. 
+The Quora duplicate questions public dataset contains 404k pairs of Quora questions, which wehave divided in three sets: a training set with 70\% of the questions, a validation set with a 20\% and a set with the last 10\% of questions for comparing the predicted results with the actual labels.\\
 
-\section{Extent of the paper}
+\section{Models}
+\subsection{Sentence BERT}
 
-The paper should have a minimum of 3 and a maximum of 4 pages, plus an additional page for references.
+Sentence-BERT (SBERT) is a method for creating semantically meaningful sentence embeddings (vector representations) using transformer-based models like BERT. It fine-tunes BERT to generate fixed-size representations of input sentences that capture their semantic meaning. SBERT is trained using a siamese or triplet network architecture, where it learns to map similar sentences closer together in the embedding space.
 
-\section{Figures and tables}
+\section{Experimental Setup}
 
-\subsection{Figures}
+% \subsection{Figures}
 
-Here is an example on how to include figures in the paper. Figures are included in \LaTeX{} code immediately \textit{after} the text in which these figures are referenced. Allow \LaTeX{} to place the figure where it believes is best (usually on top of the page of at the position where you would not place the figure). Figures are referenced as follows: ``Figure~\ref{fig:figure1} shows \dots''. Use tilde (\verb.~.) to prevent separation between the word ``Figure'' and its enumeration. 
+% Here is an example on how to include figures in the paper. Figures are included in \LaTeX{} code immediately \textit{after} the text in which these figures are referenced. Allow \LaTeX{} to place the figure where it believes is best (usually on top of the page of at the position where you would not place the figure). Figures are referenced as follows: ``Figure~\ref{fig:figure1} shows \dots''. Use tilde (\verb.~.) to prevent separation between the word ``Figure'' and its enumeration. 
+
+\section{Results}
+
+
+\section{Conclusion}
+
+
+\section{Reference}
 
 \begin{figure}
 \begin{center}
