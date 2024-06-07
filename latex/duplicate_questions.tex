@@ -12,6 +12,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta}
 
 \title{Seeing Double: Detecting Duplicate Questions using Sentence-BERT}
 
@@ -112,16 +114,7 @@ The Siamese LSTM (SLSTM) is the winning solution of the 2017 Kaggle competition 
 It employs two identical LSTMs that process two input questions simultaneously and then compares their final vector representations to determine their similarity.
 The final model uses an ensemble of the Siamese network with an LSTM and a Sequence-to-Sequence LSTM with Attention.
 This shows improved performance over the single Siamese LSTM model, even though the Seq2Seq LSTM with Attention performs significantly worse on its own \citep{dadashov2017quora}.
-The architecture diagram is shown in Figure~\ref{fig:slstm-architecture}.
 We use the reported results for the ensemble model on the QQP dev set for this model for comparison with our results in Section~\ref{results}.
-
-% \begin{figure}
-% \begin{center}
-% \includegraphics[width=\columnwidth]{figures/slstm-architecture.png}
-% \caption{SLSTM architecture}
-% \label{fig:slstm-architecture}
-% \end{center}
-% \end{figure}
 
 \subsection{Sentence-BERT}
 
@@ -136,7 +129,7 @@ Specifically for the RoBERTa and DistilRoBERTa models used, their training data 
 \section{Experiments}
 
 In this section we explain the training process for the models used in the experiments.
-We then provide an overview and discussion of the results.
+We then provide an overview and a brief discussion of the results.
 
 \subsection{Training} \label{training}
 
@@ -227,10 +220,10 @@ Expectedly, the SBERT models outperform the SLSTM model on both the dev set and 
 \midrule
 Model & F1 score & Accuracy & F1 score & Accuracy \\
 \midrule
-Cosine similarity & 0 & 0 & 0 & 0 \\
+Cosine similarity & 36.4 & 37.1 & 35.8 & 36.2 \\
 SLSTM & 79.5 & 83.9 & 79.5 & 83.8 \\
-RoBERTa & 0 & 0 & 0 & 0 \\
-DistilRoBERTa &  & 0 & 0 & 86.1 \\
+RoBERTa & 82.5 & 87.2 & 83.9 & 86.6 \\
+DistilRoBERTa & 82.7 & 87.4 & 82.2 & 86.1 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -238,10 +231,12 @@ DistilRoBERTa &  & 0 & 0 & 86.1 \\
 
 \section{Conclusion} \label{conclusion}
 
-The task of identifying duplicate questions is of particular interest to many , such as online forums and customer support platforms is an important tasks for many Q\&A platforms, as it can help enhance the user experience and ensure that valuable insights are not split across multiple locations.
-The Quora Question Pairs dataset is 
-We find that Sentence-BERT models outperform previously competitive architectures on the Quora Question Pairs dataset.
-This is to be expected as newer pretrained Transformer architectures have dominated the field as of late and have proven to be
+The task of identifying duplicate questions is of particular interest to many Q\&A platforms, as it can help enhance the user experience.
+The Quora Question Pairs dataset is an important resource in this area of research. Previous best-performing architectures on this task used Siamese LSTM based models.
+An example of such an architecture is the Siamese LSTM model, which won the 2017 Quora Question Pairs Kaggle competition.
+We investigated the performance of Sentence-BERT models on this task, and compared them to the winning solution.
+We find that Sentence-BERT models outperform the Siamese LSTM architecture on the Quora Question Pairs dataset.
+This is in line with expectations since newer pretrained Transformer architectures have dominated the field as of late.
 
 \bibliographystyle{tar2023}
 \bibliography{tar2023} 
