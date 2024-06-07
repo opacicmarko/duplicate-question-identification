@@ -1,0 +1,223 @@
+% Paper template for TAR 2022
+% (C) 2014 Jan Šnajder, Goran Glavaš, Domagoj Alagić, Mladen Karan
+% TakeLab, FER
+
+\documentclass[10pt, a4paper]{article}
+
+\usepackage{tar2023}
+
+\usepackage[utf8]{inputenc}
+\usepackage[pdftex]{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+\title{Seeing Double: Detecting Duplicate Questions using Sentence-BERT}
+
+\name{Marko Opačić, Javier Salvatierra} 
+
+\address{
+University of Zagreb, Faculty of Electrical Engineering and Computing\\
+Unska 3, 10000 Zagreb, Croatia\\ 
+\texttt{\{marko.opacic,javier.corchado\}@fer.hr}\\
+}
+
+
+\abstract{
+Lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet
+}
+
+\begin{document}
+
+\maketitleabstract
+
+\section{Introduction}
+
+Intro
+
+\section{Related Works}
+
+The problem of identifying duplicate questions has similarities to other NLP tasks, such as paraphrase detection and semantic similarity detection.
+Traditional ML approach use algorithms such as SVM with hand-picked features including n-gram overlaps, part-of-speech agreement, verb similarity and others \citep{dey2016paraphrase}.
+More recently, deep learning approaches have proved to be very effective in a variety of NLP tasks.
+Most approaches for detecting sentence similarities use a Siamese architecture, which involves producing encoded representations for each of the two input sentences, which are subsequently processed for classification, usually through some form of distance metric
+Some examples include the Siamese GRU \citep{homma2016detecting}, Siamese MaLSTM \citep{imtiaz2020duplicate} and Siamese BiLSTM \citep{fradelos2023using}.
+Convolutional neural networks (CNNs) are leveraged by several authors, also in a Siamese setting \citep{bogdanova2015detecting,prabowo2019duplicate}.
+
+The Quora Question Pairs dataset by \citet{iyer2017first} has been a valuable resource for research in this area.
+As part of a Kaggle competition using the dataset, a Siamese LSTM architecture with attention was the winning solution \citep{dadashov2017quora}.
+The winning Siamese LSTM architecture is described in Section~\ref{siamese-lstm}.
+
+In the past few years, pretrained Transformer models have set a new benchmark on sentence-pair regression tasks \citep{devlin2018bert}.
+Although the original BERT model performs well on such tasks, it has some limitations, such as requiring both sentences as inputs to determine their similarity, which results in a large computational overhead.
+The Sentence-BERT models significantly reduce the computational load and achieve state-of-the-art results on semantic textual similarity tasks \citep{reimers-2019-sentence-bert}.
+
+\section{Data}
+
+The Quora Question Pairs (QQP) dataset consists of 404k question pairs, along with labels indicating whether the questions are duplicates or not.
+
+We use the same dataset split as the SBERT paper, which is a 60/20/20 split resulting in 243k training examples, 80k dev examples and 80k test examples \citep{reimers-2019-sentence-bert}.
+The splits are not stratified, as different percentages of duplicates are present between the sets. The percentage of duplicates per set is presented in Table~\ref{tab:duplicate-percentages}.
+
+\begin{table}[ht]
+\caption{Dataset split characteristics}
+\label{tab:duplicate-percentages}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Set & No. of examples & Duplicate percentage \\
+\midrule
+Train & 243k & 37.25\% \\
+Dev   & 80k  & 35.05\% \\
+Test  & 80k  & 40.38\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Models}
+
+In this section, we describe the models used in the experiments.
+Cosine similarity is used as the simplest baseline, while the winning solution from the 2017 Quora Question Pairs competition on Kaggle serves as the baseline we are attempting to outperform.
+
+\subsection{Baselines}
+
+\subsubsection{Cosine similarity} \label{cosine-similarity}
+
+The input questions are first tokenized using spaCy, after which embeddings are calculated for each token.
+GloVe embeddings are used for this purpose, specifically the 300-dimensional vectors trained on a corpus 6B tokens from Wikipedia 2014 and Gigaword 5 \citep{pennington2014glove}.
+Aggregate embeddings for each question are then calculated by summing the embedding vectors element-wise.
+The cosine similarity is then calculated for the aggregate embeddings to obtain a similarity score.
+The similarity score is fed into a simple binary classifier which produces the final output label.
+
+\subsubsection{Siamese LSTM} \label{siamese-lstm}
+
+As a variant of recurrent neural networks (LSTM), it is an approach that compares the similarity between pairs of data sequences. It employs two identical LSTMs that process two input sequences simultaneously and then compares their final vector representations to determine their similarity.
+We only use the reported results on the dev set for this model for comparison with ou results.
+
+\subsubsection{Sentence BERT}
+
+Sentence-BERT (SBERT) is a method for creating semantically meaningful sentence embeddings (vector representations) using transformer-based models like BERT. It fine-tunes BERT to generate fixed-size representations of input sentences that capture their semantic meaning. SBERT is trained using a siamese or triplet network architecture, where it learns to map similar sentences closer together in the embedding space.
+
+In our experiments we used the pretrained RoBERTa base model (RoBERTa) described by \citet{liu2019roberta}, as well a distilled version of the same model (DistilRoBERTa). The distilled version uses the same distillation process used for DistilBERT \cite{sanh2019distilbert}.
+
+It is worth noting that with pretrained large language models there is a risk of test set contamination.
+This means that part of the test set on which the model is evaluated is used during model training. This violates the assumption that the model is evaluated on unseen data, and undermines the integrity of the results.
+Specifically for the RoBERTa and DistilRoBERTa models used, their training data does not include the QQP dataset, so we have no such concerns.
+
+\section{Experiments}
+
+In this section we explain the training process for the models used in the experiments.
+We then provide an overview and discussion of the results.
+
+\subsection{Training}
+
+\subsubsection{SBERT}
+
+We used linear warmup as described...
+Following advice from \citet{gkouti2024should}, we focused only on tuning the learning rate. For selecting the learning rate we tested values of 4e-5, 3e-5 and 2e-5, similar to the original BERT paper \cite{devlin2018bert}. We then selected the best performing learning rate on the test set.
+
+% epochs, batch size
+
+% Here is an example on how to include figures in the paper. Figures are included in \LaTeX{} code immediately \textit{after} the text in which these figures are referenced. Allow \LaTeX{} to place the figure where it believes is best (usually on top of the page of at the position where you would not place the figure). Figures are referenced as follows: ``Figure~\ref{fig:figure1} shows \dots''. Use tilde (\verb.~.) to prevent separation between the word ``Figure'' and its enumeration. 
+
+
+\section{Conclusion}
+
+% Conclusion is the last enumerated section of the paper. It should not exceed half of a column and is typically split into 2--3 paragraphs. No new information should be presented in the conclusion; this section only summarizes and concludes the paper.
+
+% \section{References}
+
+% \begin{figure}
+% \begin{center}
+% \includegraphics[width=\columnwidth]{drawing.pdf}
+% \caption{This is the figure caption. Full sentences should be followed with a dot. The caption should be placed \textit{below} the figure. Caption should be short; details should be explained in the text.}
+% \label{fig:figure1}
+% \end{center}
+% \end{figure}
+
+% \subsection{Tables}
+
+% There are two types of tables: narrow tables that fit into one column and a wide table that spreads over both columns.
+
+% \subsubsection{Narrow tables}
+
+% Table~\ref{tab:narrow-table} is an example of a narrow table. Do not use vertical lines in tables -- vertical tables have no effect and they make tables visually less attractive. We recommend using \textit{booktabs} package for nicer tables.
+
+% \begin{table}
+% \caption{This is the caption of the table. Table captions should be placed \textit{above} the table.}
+% \label{tab:narrow-table}
+% \begin{center}
+% \begin{tabular}{ll}
+% \toprule
+% Heading1 & Heading2 \\
+% \midrule
+% One & First row text \\
+% Two   & Second row text \\
+% Three   & Third row text \\
+%       & Fourth row text \\
+% \bottomrule
+% \end{tabular}
+% \end{center}
+% \end{table}
+
+% \subsection{Wide tables}
+
+% Table~\ref{tab:wide-table} is an example of a wide table that spreads across both columns. The same can be done for wide figures that should spread across the whole width of the page. 
+
+% \begin{table*}
+% \caption{Wide-table caption}
+% \label{tab:wide-table}
+% \begin{center}
+% \begin{tabular}{llr}
+% \toprule
+% Heading1 & Heading2 & Heading3\\
+% \midrule
+% A & A very long text, longer that the width of a single column & $128$\\
+% B & A very long text, longer that the width of a single column & $3123$\\
+% C & A very long text, longer that the width of a single column & $-32$\\
+% \bottomrule
+% \end{tabular}
+% \end{center}
+% \end{table*}
+
+% \section{Math expressions and formulas}
+
+% Math expressions and formulas that appear within the sentence should be written inside the so-called \emph{inline} math environment: $2+3$, $\sqrt{16}$, $h(x)=\mathbf{1}(\theta_1 x_1 + \theta_0>0)$. Larger expressions and formulas (e.g., equations) should be written in the so-called \emph{displayed} math environment:
+
+% \[
+% b^{(i)}_k = \begin{cases}
+% 1 & \text{if 
+%     $k = \text{argmin}_j \| \mathbf{x}^{(i)} - \mathbf{\mu}_j \|,$}\\
+% 0 & \text{otherwise}
+% \end{cases}
+% \]
+
+% Math expressions which you reference in the text should be written inside the \textit{equation} environment:
+
+% \begin{equation}\label{eq:kmeans-error}
+% J = \sum_{i=1}^N \sum_{k=1}^K 
+% b^{(i)}_k \| \mathbf{x}^{(i)} - \mathbf{\mu}_k \|^2
+% \end{equation}
+
+% Now you can reference equation \eqref{eq:kmeans-error}. If the paragraph continues right after the formula
+
+% \begin{equation}
+% f(x) = x^2 + \varepsilon
+% \end{equation}
+
+% \noindent like this one does, use the command \emph{noindent} after the equation to remove the indentation of the row. 
+
+% Multi-letter words in the math environment should be written inside the command \emph{mathit}, otherwise \LaTeX{} will insert spacing between the letters to denote the multiplication of values denoted by symbols. For example, compare
+% $\mathit{Consistent}(h,\mathcal{D})$ and\\
+% $Consistent(h,\mathcal{D})$.
+
+% If you need a math symbol, but you don't know the corresponding \LaTeX{} command that generates it, try
+% \emph{Detexify}.\footnote{\texttt{http://detexify.kirelabs.org/}}
+
+\bibliographystyle{tar2023}
+\bibliography{tar2023} 
+
+\end{document}
+
