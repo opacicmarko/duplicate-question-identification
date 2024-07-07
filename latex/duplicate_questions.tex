@@ -80,7 +80,7 @@ We use the same dataset split as the SBERT paper, which is a 60/20/20 split resu
 The splits are not stratified, as different percentages of duplicates are present between the sets. The percentage of duplicates per set is presented in Table~\ref{tab:duplicate-percentages}.
 
 \begin{table}
-\caption{Dataset split characteristics}
+\caption{Dataset split characteristics, showing the number of examples and the percentage of duplicates in each set.}
 \label{tab:duplicate-percentages}
 \begin{center}
 \begin{tabular}{lcc}
@@ -107,6 +107,7 @@ GloVe embeddings are used for this purpose, specifically the 300-dimensional vec
 Aggregate embeddings for each question are derived by summing the embedding vectors for each token in the question element-wise.
 The cosine similarity is then calculated for the aggregate embeddings to obtain a similarity score.
 The similarity score is fed into a simple binary classifier which produces the final output label.
+This classifier is implemented as a feed-forward layer with 2 inputs and a single output.
 
 \subsection{Siamese LSTM} \label{siamese-lstm}
 
@@ -161,7 +162,7 @@ The batch size used was 16 and the models were trained for 4 epochs, with perfor
 For the test set results the model checkpoint with the best performance on the dev set was selected. The parameters mentioned are listed in Table~\ref{tab:train-params}.
 
 \begin{table}
-\caption{Training parameters for SBERT models}
+\caption{Hyperparameters used for training SBERT models}
 \label{tab:train-params}
 \begin{center}
 \begin{tabular}{lc}
@@ -208,10 +209,13 @@ Both models were trained on a system with a single Nvidia T4 GPU.
 \subsection{Results} \label{results}
 
 The results are presented in Table~\ref{tab:results}.
-Expectedly, the SBERT models outperform the SLSTM model on both the dev set and the test set.
+All other models significantly outperform the simple cosine similarity baseline using GloVe embeddings.
+Expectedly, the SBERT models outperform the Siamese LSTM on accuracy and F1 scores on both the dev and the test.
+
+The accuracy and F1 scores during training are shown for DistilRoBERTa and RoBERTa models in Figure~\ref{fig:train-metrics-distilroberta} and Figure~\ref{fig:train-metrics-roberta}, respectively.
 
 \begin{table*}
-\caption{Results}
+\caption{Accuracy and F1 scores on the dev and test sets for the evaluated models.}
 \label{tab:results}
 \begin{center}
 \begin{tabular}{lcccc}
@@ -239,7 +243,7 @@ We find that Sentence-BERT models outperform the Siamese LSTM architecture on th
 This is in line with expectations since newer pretrained Transformer architectures have dominated the field as of late.
 
 \bibliographystyle{tar2023}
-\bibliography{tar2023} 
+\bibliography{tar2023}
 
 \end{document}
 
