@@ -74,13 +74,22 @@ The Sentence-BERT models significantly reduce the computational load and achieve
 
 \section{Data} \label{dataset}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figures/dataset-examples.png}
+\caption{Examples from the Quora Question Pairs dataset.}
+\label{fig:duplicate-examples}
+\end{center}
+\end{figure}
+
 The Quora Question Pairs (QQP) dataset consists of 404k question pairs, along with labels indicating whether the questions are duplicates or not.
+A duplicate and a non-duplicate example are shown in Figure~\ref{fig:duplicate-examples}.
 
 We use the same dataset split as the SBERT paper, which is a 60/20/20 split resulting in 243k training examples, 80k dev examples and 80k test examples \citep{reimers-2019-sentence-bert}.
 The splits are not stratified, as different percentages of duplicates are present between the sets. The percentage of duplicates per set is presented in Table~\ref{tab:duplicate-percentages}.
 
 \begin{table}
-\caption{Dataset split characteristics}
+\caption{Dataset split characteristics, showing the number of examples and the percentage of duplicates in each set.}
 \label{tab:duplicate-percentages}
 \begin{center}
 \begin{tabular}{lcc}
@@ -107,6 +116,7 @@ GloVe embeddings are used for this purpose, specifically the 300-dimensional vec
 Aggregate embeddings for each question are derived by summing the embedding vectors for each token in the question element-wise.
 The cosine similarity is then calculated for the aggregate embeddings to obtain a similarity score.
 The similarity score is fed into a simple binary classifier which produces the final output label.
+This classifier is implemented as a feedforward layer with 2 inputs and a single output.
 
 \subsection{Siamese LSTM} \label{siamese-lstm}
 
@@ -134,6 +144,8 @@ We then provide an overview and a brief discussion of the results.
 \subsection{Training} \label{training}
 
 Two SBERT models were trained and evaluated, the RoBERTa base model and it's distilled version, the DistilRoBERTa base model.
+The models were fine-tuned as cross encoders, where both sentences were fed to the model as input and a similarity score between 0 and 1 was produced as output.
+In this setup, the output of the Transformer layer is fed to a feedworward layer with two output classes which correspond to whether the question pair is a duplicate or not.
 The training for both models was performed in the same manner, using the same parameters.
 For the SLSTM model we used the reported results from the competition solution \citep{dadashov2017quora}.
 
@@ -143,7 +155,7 @@ Binary cross entropy loss is used as the loss function:
 $$
 L(\mathbf{p}, \mathbf{y}) = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log \left( \hat{p_i} \right) + (1 - y_i) \log \left( 1 - \hat{p_i} \right) \right]
 $$
-where:
+where $p_i \in [0, 1]$ is the predicted output of the model, representing a similarity score between the two input questions. Also:
 $$
 \hat{p_i} = \sigma(p_i)
 $$
@@ -155,13 +167,13 @@ $$
 
 Following advice from \citet{gkouti2024should}, we focused only on tuning the learning rate. For selecting the learning rate we tested values of 4e-5, 3e-5 and 2e-5, similar to the original BERT paper \cite{devlin2018bert}.
 Higher learning rate values were avoided to circumvent the problem of catastrophic forgetting of the pretraining data \citep{sun2019fine}.
-The model with the best performing learning rate on the test set was selected, and the results are included in Section~\ref{results}
+The learning rate for the model with the highest F1 score on the dev set was selected, and the results are included in Section~\ref{results}
 
 The batch size used was 16 and the models were trained for 4 epochs, with performance evaluation on the dev set every 5000 steps. Model checkpoints were also saved every 5000 steps.
 For the test set results the model checkpoint with the best performance on the dev set was selected. The parameters mentioned are listed in Table~\ref{tab:train-params}.
 
 \begin{table}
-\caption{Training parameters for SBERT models}
+\caption{Hyperparameters used for training SBERT models}
 \label{tab:train-params}
 \begin{center}
 \begin{tabular}{lc}
@@ -208,10 +220,18 @@ Both models were trained on a system with a single Nvidia T4 GPU.
 \subsection{Results} \label{results}
 
 The results are presented in Table~\ref{tab:results}.
-Expectedly, the SBERT models outperform the SLSTM model on both the dev set and the test set.
+All other models significantly outperform the simple cosine similarity baseline using GloVe embeddings.
+Expectedly, the SBERT models outperform the Siamese LSTM on accuracy and F1 scores on both the dev and the test set.
+
+Additionally, we can see that DistilRoBERTa has similar performance to RoBERTa, even with a lower number of training parameters and with less training time used.
+An interesting result to note is that DistilRoBERTa performed better on the dev set while RoBERTa performed better on the test set.
+This may be interpreted as DistilRoBERTa converging earlier with the RoBERTa model having a higher peak performance, but it is not a conclusive or statistically proven result.
+The above shows that, at least in our case, the DistilRoBERTa model comes with important advantages with regards to resource utilization and computing time without much sacrifice, if any, in performance.
+
+The accuracy and F1 scores during training are shown for DistilRoBERTa and RoBERTa models in Figure~\ref{fig:train-metrics-distilroberta} and Figure~\ref{fig:train-metrics-roberta}, respectively.
 
 \begin{table*}
-\caption{Results}
+\caption{Accuracy and F1 scores on the dev and test sets for the evaluated models.}
 \label{tab:results}
 \begin{center}
 \begin{tabular}{lcccc}
@@ -239,7 +259,7 @@ We find that Sentence-BERT models outperform the Siamese LSTM architecture on th
 This is in line with expectations since newer pretrained Transformer architectures have dominated the field as of late.
 
 \bibliographystyle{tar2023}
-\bibliography{tar2023} 
+\bibliography{tar2023}
 
 \end{document}
 
