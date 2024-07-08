@@ -74,7 +74,16 @@ The Sentence-BERT models significantly reduce the computational load and achieve
 
 \section{Data} \label{dataset}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figures/dataset-examples.png}
+\caption{Examples from the Quora Question Pairs dataset.}
+\label{fig:duplicate-examples}
+\end{center}
+\end{figure}
+
 The Quora Question Pairs (QQP) dataset consists of 404k question pairs, along with labels indicating whether the questions are duplicates or not.
+A duplicate and a non-duplicate example are shown in Figure~\ref{fig:duplicate-examples}.
 
 We use the same dataset split as the SBERT paper, which is a 60/20/20 split resulting in 243k training examples, 80k dev examples and 80k test examples \citep{reimers-2019-sentence-bert}.
 The splits are not stratified, as different percentages of duplicates are present between the sets. The percentage of duplicates per set is presented in Table~\ref{tab:duplicate-percentages}.
@@ -135,6 +144,8 @@ We then provide an overview and a brief discussion of the results.
 \subsection{Training} \label{training}
 
 Two SBERT models were trained and evaluated, the RoBERTa base model and it's distilled version, the DistilRoBERTa base model.
+The models were fine-tuned as cross encoders, where both sentences were fed to the model as input and a similarity score between 0 and 1 was produced as output.
+In this setup, the output of the Transformer layer is fed to a feedworward layer with two output classes which correspond to whether the question pair is a duplicate or not.
 The training for both models was performed in the same manner, using the same parameters.
 For the SLSTM model we used the reported results from the competition solution \citep{dadashov2017quora}.
 
@@ -144,7 +155,7 @@ Binary cross entropy loss is used as the loss function:
 $$
 L(\mathbf{p}, \mathbf{y}) = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log \left( \hat{p_i} \right) + (1 - y_i) \log \left( 1 - \hat{p_i} \right) \right]
 $$
-where:
+where $p_i \in [0, 1]$ is the predicted output of the model, representing a similarity score between the two input questions. Also:
 $$
 \hat{p_i} = \sigma(p_i)
 $$
@@ -156,7 +167,7 @@ $$
 
 Following advice from \citet{gkouti2024should}, we focused only on tuning the learning rate. For selecting the learning rate we tested values of 4e-5, 3e-5 and 2e-5, similar to the original BERT paper \cite{devlin2018bert}.
 Higher learning rate values were avoided to circumvent the problem of catastrophic forgetting of the pretraining data \citep{sun2019fine}.
-The model with the best performing learning rate on the test set was selected, and the results are included in Section~\ref{results}
+The learning rate for the model with the highest F1 score on the dev set was selected, and the results are included in Section~\ref{results}
 
 The batch size used was 16 and the models were trained for 4 epochs, with performance evaluation on the dev set every 5000 steps. Model checkpoints were also saved every 5000 steps.
 For the test set results the model checkpoint with the best performance on the dev set was selected. The parameters mentioned are listed in Table~\ref{tab:train-params}.
@@ -210,7 +221,12 @@ Both models were trained on a system with a single Nvidia T4 GPU.
 
 The results are presented in Table~\ref{tab:results}.
 All other models significantly outperform the simple cosine similarity baseline using GloVe embeddings.
-Expectedly, the SBERT models outperform the Siamese LSTM on accuracy and F1 scores on both the dev and the test.
+Expectedly, the SBERT models outperform the Siamese LSTM on accuracy and F1 scores on both the dev and the test set.
+
+Additionally, we can see that DistilRoBERTa has similar performance to RoBERTa, even with a lower number of training parameters and with less training time used.
+An interesting result to note is that DistilRoBERTa performed better on the dev set while RoBERTa performed better on the test set.
+This may be interpreted as DistilRoBERTa converging earlier with the RoBERTa model having a higher peak performance, but it is not a conclusive or statistically proven result.
+The above shows that, at least in our case, the DistilRoBERTa model comes with important advantages with regards to resource utilization and computing time without much sacrifice, if any, in performance.
 
 The accuracy and F1 scores during training are shown for DistilRoBERTa and RoBERTa models in Figure~\ref{fig:train-metrics-distilroberta} and Figure~\ref{fig:train-metrics-roberta}, respectively.
 
