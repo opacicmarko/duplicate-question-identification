@@ -116,7 +116,7 @@ GloVe embeddings are used for this purpose, specifically the 300-dimensional vec
 Aggregate embeddings for each question are derived by summing the embedding vectors for each token in the question element-wise.
 The cosine similarity is then calculated for the aggregate embeddings to obtain a similarity score.
 The similarity score is fed into a simple binary classifier which produces the final output label.
-This classifier is implemented as a feed-forward layer with 2 inputs and a single output.
+This classifier is implemented as a feedforward layer with 2 inputs and a single output.
 
 \subsection{Siamese LSTM} \label{siamese-lstm}
 
